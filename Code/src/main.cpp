@@ -130,12 +130,12 @@ int main ()
   float                            pz_new;
 
   // SIMULATION VARIABLES:
-  float                            safety_CFL = 0.2f;                                               // Courant-Friedrichs-Lewy safety coefficient [].
+  float                            safety_CFL = 1.0f;                                               // Courant-Friedrichs-Lewy safety coefficient [].
   int                              N          = 2;                                                  // Number of spatial dimensions of the MSM [].
-  float                            rho        = 0.01f;                                              // Mass density [kg/m^2].
-  float                            E          = 100000000000.0f;                                    // Young's modulus [Pa];
-  float                            nu         = 0.3f;                                               // Poisson's ratio [];
-  float                            beta       = 10.0f;                                              // Damping [kg*s*m].
+  float                            rho        = 1E+9f;                                              // Mass density [kg/m^2].
+  float                            E          = 1E+6f;                                              // Young's modulus [Pa];
+  float                            nu         = 0.25f;                                              // Poisson's ratio [];
+  float                            beta       = 1E+5f;                                              // Damping [kg*s*m].
   float                            R          = 10.0;                                               // Particle's radius [#cells].
 
   float                            ds;                                                              // Cell size [m].
@@ -214,9 +214,9 @@ int main ()
   for(i = 0; i < nodes; i++)
   {
     position->data[i].w = 1.0f;                                                                     // Setting freedom flag...
-    position_int->data.push_back (position->data[i]);                                               // Setting intermediate position...
+    position_int->data.push_back ({0.0f, 0.0f, 0.0f, 0.0f});                                        // Setting intermediate position...
     velocity->data.push_back ({0.0f, 0.0f, 0.0f, beta});                                            // Setting velocity...
-    velocity_int->data.push_back ({0.0f, 0.0f, 0.0f, 1.0f});                                        // Setting intermediate velocity...
+    velocity_int->data.push_back ({0.0f, 0.0f, 0.0f, 0.0f});                                        // Setting intermediate velocity...
     acceleration->data.push_back ({0.0f, 0.0f, 0.0f, dm});                                          // Setting acceleration...
 
     // Finding spinor:
