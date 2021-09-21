@@ -49,11 +49,14 @@ __kernel void thekernel(__global float4*    position,                           
     a = (float3)(0.0f, 0.0f, 0.0f);                                                   // Constraining acceleration...
   }
 
+  // COMPUTING NEW POSITION:
+  p_new = p + v*dt + 0.5f*a*dt*dt;                                                    // Computing Taylor's approximation...
+        
   for(j = 0; j < s_num; j++)
   {
     if(i == spinor[j])
     {
-      p = spinor_pos[j].xyz;
+      p_new = spinor_pos[j].xyz;
     }
   }
 
@@ -61,13 +64,10 @@ __kernel void thekernel(__global float4*    position,                           
   {
     if(i == frontier[j])
     {
-      p = frontier_pos[j].xyz;
+      p_new = frontier_pos[j].xyz;
     }
   }
 
-  // COMPUTING NEW POSITION:
-  p_new = p + v*dt + 0.5f*a*dt*dt;                                                    // Computing Taylor's approximation...
-        
   // UPDATING INTERMEDIATE POSITION:
   position[i].xyz = p_new;                                                            // Updating new position...
   velocity_int[i].xyz = v + a*dt;                                                     // Updating intermediate velocity...          
