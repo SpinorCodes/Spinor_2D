@@ -121,7 +121,7 @@ __kernel void thekernel(__global float4*    position,                           
   a_new = F_new/m;                                                                    // Computing acceleration...
   
   // APPLYING FREEDOM CONSTRAINTS:
-  if (freedom == 0.0f)
+  if (freedom < FLT_EPSILON)
   {
     a_new = (float3)(0.0f, 0.0f, 0.0f);                                               // Constraining acceleration...
   }
@@ -130,7 +130,7 @@ __kernel void thekernel(__global float4*    position,                           
   v_new = v + 0.5f*(a + a_new)*dt;                                                    // Computing velocity...
 
   // APPLYING FREEDOM CONSTRAINTS:
-  if (freedom == 0.0f)
+  if (freedom < FLT_EPSILON)
   {
     v_new = (float3)(0.0f, 0.0f, 0.0f);                                               // Constraining velocity...
   }
