@@ -161,7 +161,7 @@ int main ()
   float                            E              = 1.0E-2f;                                         // Young's modulus [Pa];
   float                            ni             = 0.2f;                                            // Poisson's ratio [];
   float                            beta           = 1.0E-4f;                                         // Damping [kg*s*m].
-  int                              R              = 3;                                               // Particle's radius [#cells].
+  int                              R              = 1;                                               // Particle's radius [#cells].
 
   float                            ds;                                                               // Cell size [m].
   float                            dV;                                                               // Cell Volume [m^3].
@@ -240,7 +240,7 @@ int main ()
              pow (position->data[i].x, 2) +
              pow (position->data[i].y, 2) +
              pow (position->data[i].z, 2)
-            ) < (sqrt (3.0f)*ds*R + 0.01f)
+            ) < (sqrt (3.0f)*ds/2.0f + FLT_EPSILON)
       )
     /*if(
        ((-0.01f - 3*ds) < position->data[i].x) &&
