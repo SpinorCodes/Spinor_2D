@@ -4,9 +4,9 @@
 /// @brief    1st kernel.
 /// @details  Applies freedom contraints, computes new position, uptades intermediate position.
 __kernel void thekernel(__global float4*    position,                                 // vec4(position.xyz [m], freedom []).
-                        __global float4*    position_int,                             // vec4(position (intermediate) [m], radiative energy [J]).
                         __global float4*    velocity,                                 // vec4(velocity.xyz [m/s], friction [N*s/m]).
                         __global float4*    velocity_int,                             // vec4(velocity (intermediate) [m/s], number of 1st + 2nd nearest neighbours []).
+                        __global float4*    velocity_est,                             // vec4(velocity.xyz (estimation) [m/s], radiative energy [J]).
                         __global float4*    acceleration,                             // vec4(acceleration.xyz [m/s^2], mass [kg]).
                         __global float4*    color,                                    // vec4(color.xyz [], alpha []).
                         __global float*     stiffness,                                // Stiffness.
@@ -33,22 +33,24 @@ __kernel void thekernel(__global float4*    position,                           
   //////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////// CELL VARIABLES //////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////
-  float3        p                 = position[i].xyz;                                  // Central node position.
-  float3        v                 = velocity[i].xyz;                                  // Central node velocity.
-  float3        a                 = acceleration[i].xyz;                              // Central node acceleration.
-  float3        p_new             = (float3)(0.0f, 0.0f, 0.0f);                       // Central node position. 
-  float         fr                = position[i].w;                                    // Central node freedom flag.
-  float         dt                = dt_simulation[0];                                 // Simulation time step.
+  float3        p                 = adjzero3(position[i].xyz);                        // Central node position.
+  float3        v                 = adjzero3(velocity[i].xyz);                        // Central node velocity.
+  float3        a                 = adjzero3(acceleration[i].xyz);                    // Central node acceleration.
+  float3        p_new             = (float3)(0.0f, 0.0f, 0.0f);                       // Central node position (new). 
+  float3        v_int             = (float3)(0.0f, 0.0f, 0.0f);                       // Central node velocity (intermediate). 
+  float         fr                = adjzero(position[i].w);                           // Central node freedom flag.
+  float         dt                = adjzero(dt_simulation[0]);                        // Simulation time step.
   int           s_num             = spinor_num[0];                                    // Spinor cells number.
   int           f_num             = frontier_num[0];                                  // Spacetime frontier cells number.
 
   // APPLYING FREEDOM CONSTRAINTS:
-  if (fr == 0)
+  if (fr < FLT_EPSILON)
   {
     v = (float3)(0.0f, 0.0f, 0.0f);                                                   // Constraining velocity...
     a = (float3)(0.0f, 0.0f, 0.0f);                                                   // Constraining acceleration...
   }
-        
+
+  // FINDING SPINOR:
   for(j = 0; j < s_num; j++)
   {
     if(i == spinor[j])
@@ -57,6 +59,7 @@ __kernel void thekernel(__global float4*    position,                           
     }
   }
 
+  // FINDING FRONTIER:
   for(j = 0; j < f_num; j++)
   {
     if(i == frontier[j])
@@ -66,9 +69,10 @@ __kernel void thekernel(__global float4*    position,                           
   }
 
   // COMPUTING NEW POSITION:
-  p_new = p + v*dt + 0.5f*a*dt*dt;                                                    // Computing Taylor's approximation...
+  p_new = p + mulzero3(dt, v) + mulzero3(0.5f, mulzero3(pownzero(dt, 2), a));         // Computing new position...
+  v_int = v + mulzero3(dt, a);                                                        // Computing intermediate velocity...
 
-  // UPDATING INTERMEDIATE POSITION:
+  // UPDATING KINEMATICS:
   position[i].xyz = p_new;                                                            // Updating new position...
-  velocity_int[i].xyz = v + a*dt;                                                     // Updating intermediate velocity...          
+  velocity_int[i].xyz = v_int;                                                        // Updating intermediate velocity...          
 }
