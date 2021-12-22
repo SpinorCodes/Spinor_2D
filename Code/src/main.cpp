@@ -3,40 +3,44 @@
 /// @date     30AUG2021
 /// @brief    Single 1/2 spinor in 2D.
 
-#define INTEROP       true                                                                           // "true" = use OpenGL-OpenCL interoperability.
-#define SX            800                                                                            // Window x-size [px].
-#define SY            600                                                                            // Window y-size [px].
-#define NA            "Neutrino - Spinor_2D"                                                         // Window name.
-#define OX            0.0f                                                                           // x-axis orbit initial rotation.
-#define OY            0.0f                                                                           // y-axis orbit initial rotation.
-#define PX            0.0f                                                                           // x-axis pan initial translation.
-#define PY            0.0f                                                                           // y-axis pan initial translation.
-#define PZ            -2.0f                                                                          // z-axis pan initial translation.
+#define INTEROP        true                                                                          // "true" = use OpenGL-OpenCL interoperability.
+#define SX             800                                                                           // Window x-size [px].
+#define SY             600                                                                           // Window y-size [px].
+#define NA             "Neutrino - Spinor_2D"                                                        // Window name.
+#define OX             0.0f                                                                          // x-axis orbit initial rotation.
+#define OY             0.0f                                                                          // y-axis orbit initial rotation.
+#define PX             0.0f                                                                          // x-axis pan initial translation.
+#define PY             0.0f                                                                          // y-axis pan initial translation.
+#define PZ             -2.0f                                                                         // z-axis pan initial translation.
+#define ROT            0.01f                                                                         // Spinor rotation factor.
+#define SPINOR_SCALE   0.99f                                                                         // Spinor scale factor.
+#define FRONTIER_SCALE 0.9995f                                                                       // Boundary scale factor.
+
 
 #ifdef __linux__
-  #define SHADER_HOME "../../Code/shader/"                                                           // Linux OpenGL shaders directory.
-  #define KERNEL_HOME "../../Code/kernel/"                                                           // Linux OpenCL kernels directory.
-  #define GMSH_HOME   "../../Code/mesh/"                                                             // Linux GMSH mesh directory.
+  #define SHADER_HOME  "../../Code/shader/"                                                          // Linux OpenGL shaders directory.
+  #define KERNEL_HOME  "../../Code/kernel/"                                                          // Linux OpenCL kernels directory.
+  #define GMSH_HOME    "../../Code/mesh/"                                                            // Linux GMSH mesh directory.
 #endif
 
 #ifdef WIN32
-  #define SHADER_HOME "..\\..\\Code\\shader\\"                                                       // Windows OpenGL shaders directory.
-  #define KERNEL_HOME "..\\..\\Code\\kernel\\"                                                       // Windows OpenCL kernels directory.
-  #define GMSH_HOME   "..\\..\\Code\\mesh\\"                                                         // Linux GMSH mesh directory.
+  #define SHADER_HOME  "..\\..\\Code\\shader\\"                                                      // Windows OpenGL shaders directory.
+  #define KERNEL_HOME  "..\\..\\Code\\kernel\\"                                                      // Windows OpenCL kernels directory.
+  #define GMSH_HOME    "..\\..\\Code\\mesh\\"                                                        // Linux GMSH mesh directory.
 #endif
 
-#define SHADER_VERT   "voxel_vertex.vert"                                                            // OpenGL vertex shader.
-#define SHADER_GEOM   "voxel_geometry.geom"                                                          // OpenGL geometry shader.
-#define SHADER_FRAG   "voxel_fragment.frag"                                                          // OpenGL fragment shader.
-#define OVERLAY_VERT  "overlay_vertex.vert"                                                          // OpenGL vertex shader.
-#define OVERLAY_GEOM  "overlay_geometry.geom"                                                        // OpenGL geometry shader.
-#define OVERLAY_FRAG  "overlay_fragment.frag"                                                        // OpenGL fragment shader.
-#define KERNEL_1      "spinor_kernel_1.cl"                                                           // OpenCL kernel source.
-#define KERNEL_2      "spinor_kernel_2.cl"                                                           // OpenCL kernel source.
-#define KERNEL_3      "spinor_kernel_3.cl"                                                           // OpenCL kernel source.
-#define UTILITIES     "utilities.cl"                                                                 // OpenCL utilities source.
-#define MESH_FILE     "spacetime.msh"                                                                // GMSH mesh.
-#define MESH          GMSH_HOME MESH_FILE                                                            // GMSH mesh (full path).
+#define SHADER_VERT    "voxel_vertex.vert"                                                           // OpenGL vertex shader.
+#define SHADER_GEOM    "voxel_geometry.geom"                                                         // OpenGL geometry shader.
+#define SHADER_FRAG    "voxel_fragment.frag"                                                         // OpenGL fragment shader.
+#define OVERLAY_VERT   "overlay_vertex.vert"                                                         // OpenGL vertex shader.
+#define OVERLAY_GEOM   "overlay_geometry.geom"                                                       // OpenGL geometry shader.
+#define OVERLAY_FRAG   "overlay_fragment.frag"                                                       // OpenGL fragment shader.
+#define KERNEL_1       "spinor_kernel_1.cl"                                                          // OpenCL kernel source.
+#define KERNEL_2       "spinor_kernel_2.cl"                                                          // OpenCL kernel source.
+#define KERNEL_3       "spinor_kernel_3.cl"                                                          // OpenCL kernel source.
+#define UTILITIES      "utilities.cl"                                                                // OpenCL utilities source.
+#define MESH_FILE      "spacetime.msh"                                                               // GMSH mesh.
+#define MESH           GMSH_HOME MESH_FILE                                                           // GMSH mesh (full path).
 
 // INCLUDES:
 #include "nu.hpp"                                                                                    // Neutrino header file.
@@ -280,8 +284,8 @@ int main ()
   }
 
   // SETTING MESH PHYSICAL CONSTRAINTS:
-  boundary.push_back (ABCD);                                                                         // Setting boundary surface...
-  boundary.push_back (EFGH);                                                                         // Setting boundary surface...
+  //boundary.push_back (ABCD);                                                                         // Setting boundary surface...
+  //boundary.push_back (EFGH);                                                                         // Setting boundary surface...
   boundary.push_back (ADHE);                                                                         // Setting boundary surface...
   boundary.push_back (BCGF);                                                                         // Setting boundary surface...
   boundary.push_back (ABFE);                                                                         // Setting boundary surface...
@@ -350,7 +354,7 @@ int main ()
   while(!gl->closed ())                                                                              // Opening window...
   {
     cl->get_tic ();                                                                                  // Getting "tic" [us]...
-    cl->write (13);                                                                                  // Writing spinor's position...
+    cl->write (13);                                                                                  // Writing spinor position...
     cl->write (16);                                                                                  // Writing frontier position...
     cl->acquire ();                                                                                  // Acquiring variables...
     cl->execute (kernel_1, nu::WAIT);                                                                // Executing OpenCL kernel...
@@ -470,8 +474,8 @@ int main ()
         px                    = spinor_pos->data[i].x;
         py                    = spinor_pos->data[i].y;
 
-        px_new                = +cos (0.01f)*px - sin (0.01f)*py;
-        py_new                = +sin (0.01f)*px + cos (0.01f)*py;
+        px_new                = +cos (ROT)*px - sin (ROT)*py;
+        py_new                = +sin (ROT)*px + cos (ROT)*py;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
@@ -485,8 +489,8 @@ int main ()
         px                    = spinor_pos->data[i].x;
         py                    = spinor_pos->data[i].y;
 
-        px_new                = +cos (0.01f)*px + sin (0.01f)*py;
-        py_new                = -sin (0.01f)*px + cos (0.01f)*py;
+        px_new                = +cos (ROT)*px + sin (ROT)*py;
+        py_new                = -sin (ROT)*px + cos (ROT)*py;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
@@ -500,8 +504,8 @@ int main ()
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
-        py_new                = +cos (0.01f)*py - sin (0.01f)*pz;
-        pz_new                = +sin (0.01f)*py + cos (0.01f)*pz;
+        py_new                = +cos (ROT)*py - sin (ROT)*pz;
+        pz_new                = +sin (ROT)*py + cos (ROT)*pz;
 
         spinor_pos->data[i].y = py_new;
         spinor_pos->data[i].z = pz_new;
@@ -515,8 +519,8 @@ int main ()
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
-        py_new                = +cos (0.01f)*py + sin (0.01f)*pz;
-        pz_new                = -sin (0.01f)*py + cos (0.01f)*pz;
+        py_new                = +cos (ROT)*py + sin (ROT)*pz;
+        pz_new                = -sin (ROT)*py + cos (ROT)*pz;
 
         spinor_pos->data[i].y = py_new;
         spinor_pos->data[i].z = pz_new;
@@ -531,9 +535,9 @@ int main ()
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
-        px_new                = px*0.99f;
-        py_new                = py*0.99f;
-        pz_new                = pz*0.99f;
+        px_new                = px*SPINOR_SCALE;
+        py_new                = py*SPINOR_SCALE;
+        pz_new                = pz*SPINOR_SCALE;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
@@ -549,9 +553,9 @@ int main ()
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
-        px_new                = px/0.99f;
-        py_new                = py/0.99f;
-        pz_new                = pz/0.99f;
+        px_new                = px/SPINOR_SCALE;
+        py_new                = py/SPINOR_SCALE;
+        pz_new                = pz/SPINOR_SCALE;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
@@ -567,9 +571,9 @@ int main ()
         py                      = frontier_pos->data[i].y;
         pz                      = frontier_pos->data[i].z;
 
-        px_new                  = px*0.999f;
-        py_new                  = py*0.999f;
-        pz_new                  = pz*0.999f;
+        px_new                  = px*FRONTIER_SCALE;
+        py_new                  = py*FRONTIER_SCALE;
+        pz_new                  = pz*FRONTIER_SCALE;
 
         frontier_pos->data[i].x = px_new;
         frontier_pos->data[i].y = py_new;
@@ -587,9 +591,9 @@ int main ()
         py                      = frontier_pos->data[i].y;
         pz                      = frontier_pos->data[i].z;
 
-        px_new                  = px/0.999f;
-        py_new                  = py/0.999f;
-        pz_new                  = pz/0.999f;
+        px_new                  = px/FRONTIER_SCALE;
+        py_new                  = py/FRONTIER_SCALE;
+        pz_new                  = pz/FRONTIER_SCALE;
 
         frontier_pos->data[i].x = px_new;
         frontier_pos->data[i].y = py_new;
