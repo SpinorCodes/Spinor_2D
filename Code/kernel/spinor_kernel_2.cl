@@ -81,4 +81,6 @@ __kernel void thekernel(__global float4*    position,                           
 
   velocity_est[n].w = Jacc;                                                           // Accumulating central node radiative energy...
   velocity_int[n].w = b;                                                              // Setting number of 1st + 2nd nearest neighbours...
+  velocity_est[n].z = 0.0f;
+  velocity_int[n].z = 0.0f;
 }
