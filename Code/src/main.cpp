@@ -365,6 +365,7 @@ int main ()
     cl->execute (kernel_1, nu::WAIT);                                                                // Executing OpenCL kernel...
     cl->execute (kernel_2, nu::WAIT);                                                                // Executing OpenCL kernel...
     cl->execute (kernel_3, nu::WAIT);                                                                // Executing OpenCL kernel...
+    cl->execute (kernel_4, nu::WAIT);                                                                // Executing OpenCL kernel...
     cl->release ();                                                                                  // Releasing variables...
 
     gl->begin ();                                                                                    // Beginning gl...
@@ -398,6 +399,14 @@ int main ()
 
     if(ImGui::Button ("(U)pdate") || gl->key_U)
     {
+      // SETTING NEUTRINO ARRAYS ("nodes" depending):
+      for(i = 0; i < nodes; i++)
+      {
+        velocity->data[i].w = beta;                                                                  // Setting friction...
+      }
+
+      cl->write (2);                                                                                 // Writing vec4(velocity.xyz [m/s], friction [N*s/m])...
+
       // SETTING NEUTRINO ARRAYS ("neighbours" depending):
       for(i = 0; i < neighbours; i++)
       {
@@ -419,6 +428,22 @@ int main ()
 
     if(ImGui::Button ("(R)estart") || gl->button_TRIANGLE || gl->key_R)
     {
+      position->data     = initial_position;                                                         // Restoring backup...
+      position_int->data = initial_position_int;                                                     // Restoring backup...
+      velocity->data     = initial_velocity;                                                         // Restoring backup...
+      velocity_int->data = initial_velocity_int;                                                     // Restoring backup...
+      acceleration->data = initial_acceleration;                                                     // Restoring backup...
+      spinor_pos->data   = initial_spinor_pos;                                                       // Restoring backup...
+      frontier_pos->data = initial_frontier_pos;                                                     // Restoring backup...
+
+      // SETTING NEUTRINO ARRAYS ("nodes" depending):
+      for(i = 0; i < nodes; i++)
+      {
+        velocity->data[i].w = beta;                                                                  // Setting friction...
+      }
+
+      cl->write (2);                                                                                 // Writing vec4(velocity.xyz [m/s], friction [N*s/m])...
+
       // SETTING NEUTRINO ARRAYS ("neighbours" depending):
       for(i = 0; i < neighbours; i++)
       {
@@ -433,17 +458,8 @@ int main ()
         }
       }
 
-      position->data     = initial_position;                                                         // Restoring backup...
-      position_int->data = initial_position_int;                                                     // Restoring backup...
-      velocity->data     = initial_velocity;                                                         // Restoring backup...
-      velocity_int->data = initial_velocity_int;                                                     // Restoring backup...
-      acceleration->data = initial_acceleration;                                                     // Restoring backup...
-      spinor_pos->data   = initial_spinor_pos;                                                       // Restoring backup...
-      frontier_pos->data = initial_frontier_pos;                                                     // Restoring backup...
-
       cl->write (0);                                                                                 // Writing vec4(position.xyz [m], freedom [])...
       cl->write (1);                                                                                 // Writing vec4(position (intermediate) [m], radiative energy [J])...
-      cl->write (2);                                                                                 // Writing vec4(velocity.xyz [m/s], friction [N*s/m])...
       cl->write (3);                                                                                 // Writing velocity (intermediate) [m/s]...
       cl->write (4);                                                                                 // Writing vec4(acceleration.xyz [m/s^2], mass [kg])...
       cl->write (6);                                                                                 // Writing stiffness...
@@ -502,10 +518,11 @@ int main ()
       }
     }
 
-    if(gl->button_DPAD_DOWN)
-    {
-      for(i = 0; i < (GLuint)spinor_num->data[0]; i++)
-      {
+    /*
+       if(gl->button_DPAD_DOWN)
+       {
+       for(i = 0; i < (GLuint)spinor_num->data[0]; i++)
+       {
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
@@ -514,13 +531,13 @@ int main ()
 
         spinor_pos->data[i].y = py_new;
         spinor_pos->data[i].z = pz_new;
-      }
-    }
+       }
+       }
 
-    if(gl->button_DPAD_UP)
-    {
-      for(i = 0; i < (GLuint)spinor_num->data[0]; i++)
-      {
+       if(gl->button_DPAD_UP)
+       {
+       for(i = 0; i < (GLuint)spinor_num->data[0]; i++)
+       {
         py                    = spinor_pos->data[i].y;
         pz                    = spinor_pos->data[i].z;
 
@@ -529,8 +546,9 @@ int main ()
 
         spinor_pos->data[i].y = py_new;
         spinor_pos->data[i].z = pz_new;
-      }
-    }
+       }
+       }
+     */
 
     if(gl->button_LEFT_BUMPER)
     {
@@ -538,15 +556,15 @@ int main ()
       {
         px                    = spinor_pos->data[i].x;
         py                    = spinor_pos->data[i].y;
-        pz                    = spinor_pos->data[i].z;
+        //pz                    = spinor_pos->data[i].z;
 
         px_new                = px*SPINOR_SCALE;
         py_new                = py*SPINOR_SCALE;
-        pz_new                = pz*SPINOR_SCALE;
+        //pz_new                = pz*SPINOR_SCALE;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
-        spinor_pos->data[i].z = pz_new;
+        //spinor_pos->data[i].z = pz_new;
       }
     }
 
@@ -556,15 +574,15 @@ int main ()
       {
         px                    = spinor_pos->data[i].x;
         py                    = spinor_pos->data[i].y;
-        pz                    = spinor_pos->data[i].z;
+        //pz                    = spinor_pos->data[i].z;
 
         px_new                = px/SPINOR_SCALE;
         py_new                = py/SPINOR_SCALE;
-        pz_new                = pz/SPINOR_SCALE;
+        //pz_new                = pz/SPINOR_SCALE;
 
         spinor_pos->data[i].x = px_new;
         spinor_pos->data[i].y = py_new;
-        spinor_pos->data[i].z = pz_new;
+        //spinor_pos->data[i].z = pz_new;
       }
     }
 
@@ -574,15 +592,15 @@ int main ()
       {
         px                      = frontier_pos->data[i].x;
         py                      = frontier_pos->data[i].y;
-        pz                      = frontier_pos->data[i].z;
+        //pz                      = frontier_pos->data[i].z;
 
         px_new                  = px*FRONTIER_SCALE;
         py_new                  = py*FRONTIER_SCALE;
-        pz_new                  = pz*FRONTIER_SCALE;
+        //pz_new                  = pz*FRONTIER_SCALE;
 
         frontier_pos->data[i].x = px_new;
         frontier_pos->data[i].y = py_new;
-        frontier_pos->data[i].z = pz_new;
+        //frontier_pos->data[i].z = pz_new;
 
         pressure--;
       }
@@ -594,15 +612,15 @@ int main ()
       {
         px                      = frontier_pos->data[i].x;
         py                      = frontier_pos->data[i].y;
-        pz                      = frontier_pos->data[i].z;
+        //pz                      = frontier_pos->data[i].z;
 
         px_new                  = px/FRONTIER_SCALE;
         py_new                  = py/FRONTIER_SCALE;
-        pz_new                  = pz/FRONTIER_SCALE;
+        //pz_new                  = pz/FRONTIER_SCALE;
 
         frontier_pos->data[i].x = px_new;
         frontier_pos->data[i].y = py_new;
-        frontier_pos->data[i].z = pz_new;
+        //frontier_pos->data[i].z = pz_new;
 
         pressure++;
       }

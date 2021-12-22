@@ -134,6 +134,9 @@ __kernel void thekernel(__global float4*    position,                           
     v_new = (float3)(0.0f, 0.0f, 0.0f);                                               // Constraining new velocity...
   }
 
+  v_new.z = 0.0f;
+  a_new.z = 0.0f;
+
   // UPDATING KINEMATICS:
   velocity[n].xyz = v_new;                                                            // Updating velocity [m/s]...
   acceleration[n].xyz = a_new;                                                        // Updating acceleration [m/s^2]...
